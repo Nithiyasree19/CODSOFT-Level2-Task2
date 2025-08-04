@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Quiz - Quiz Maker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Create a New Quiz</h2>
+    <form id="quizForm">
+      <input type="text" id="title" placeholder="Quiz Title" required>
+      <textarea id="description" placeholder="Quiz Description"></textarea>
+      <div id="questionsContainer">
+        <div class="question">
+          <h4>Question 1</h4>
+          <input type="text" class="questionText" placeholder="Enter question" required>
+          <input type="text" class="option" placeholder="Option A" required>
+          <input type="text" class="option" placeholder="Option B" required>
+          <input type="text" class="option" placeholder="Option C" required>
+          <input type="text" class="option" placeholder="Option D" required>
+          <input type="text" class="correctAnswer" placeholder="Correct Answer (A/B/C/D)" required>
+        </div>
+      </div>
+      <button type="button" id="addQuestion">+ Add Another Question</button>
+      <button type="submit">Create Quiz</button>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('quizForm');
+    const addQuestionBtn = document.getElementById('addQuestion');
+    const questionsContainer = document.getElementById('questionsContainer');
+
+    addQuestionBtn.addEventListener('click', () => {
+      const questionCount = questionsContainer.children.length + 1;
+      const questionHTML = `
+        <div class="question">
+          <h4>Question ${questionCount}</h4>
+          <input type="text" class="questionText" placeholder="Enter question" required>
+          <input type="text" class="option" placeholder="Option A" required>
+          <input type="text" class="option" placeholder="Option B" required>
+          <input type="text" class="option" placeholder="Option C" required>
+          <input type="text" class="option" placeholder="Option D" required>
+          <input type="text" class="correctAnswer" placeholder="Correct Answer (A/B/C/D)" required>
+        </div>`;
+      questionsContainer.insertAdjacentHTML('beforeend', questionHTML);
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const title = document.getElementById('title').value;
+      const description = document.getElementById('description').value;
+      const questions = Array.from(document.querySelectorAll('.question')).map(q => ({
+        questionText: q.querySelector('.questionText').value,
+        options: Array.from(q.querySelectorAll('.option')).map(o => o.value),
+        correctAnswer: q.querySelector('.correctAnswer').value
+      }));
+
+      const quizData = { title, description, questions };
+      console.log("🔍 Quiz Data Prepared:", quizData);
+
+      try {
+        const response = await fetch('http://localhost:5000/api/quizzes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(quizData)
+        });
+
+        console.log("🔍 API Response Status:", response.status);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("❌ Server Error Response:", errorText);
+          alert(`Error creating quiz: ${response.statusText}`);
+          return;
+        }
+
+        const result = await response.json();
+        console.log("✅ Quiz Created Successfully:", result);
+        alert('Quiz created successfully!');
+        form.reset();
+      } catch (error) {
+        console.error("🔥 Network/Fetch Error:", error);
+        alert('Error creating quiz. Check server connection.');
+      }
+    });
+  </script>
+</body>
+</html>

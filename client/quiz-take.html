@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Take Quiz - Quiz Maker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container" id="quizContainer"></div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const quizId = params.get('id');
+    let currentQuestion = 0;
+    let score = 0;
+    let quizData = [];
+
+    async function loadQuiz() {
+      const res = await fetch(`http://localhost:5000/api/quizzes`);
+      const quizzes = await res.json();
+      quizData = quizzes.find(q => q._id === quizId).questions;
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const container = document.getElementById('quizContainer');
+      if (currentQuestion < quizData.length) {
+        const q = quizData[currentQuestion];
+        container.innerHTML = `
+          <h3>${q.questionText}</h3>
+          ${q.options.map((opt, i) => `
+            <button onclick="checkAnswer('${String.fromCharCode(65 + i)}')">${opt}</button>
+          `).join('')}
+        `;
+      } else {
+        container.innerHTML = `<h2>Your Score: ${score}/${quizData.length}</h2>`;
+      }
+    }
+
+    function checkAnswer(ans) {
+      if (ans === quizData[currentQuestion].correctAnswer) score++;
+      currentQuestion++;
+      showQuestion();
+    }
+
+    loadQuiz();
+  </script>
+</body>
+</html>
