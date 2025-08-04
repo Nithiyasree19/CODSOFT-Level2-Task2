@@ -24,6 +24,15 @@ This project allows users to **register, log in, create quizzes, take quizzes, a
 
 ---
 
+## Author
+
+**Nithiyasree M**
+
+**Batch:** BATCHB38 
+**CODSOFT Web Development Internship – July 2025
+**
+
+
 
 
 
